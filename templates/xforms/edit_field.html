@@ -1,0 +1,54 @@
+<script type="text/javascript">
+function deleteField() {
+	if(confirm("Are you sure you want to delete \"{{ field.name }}\" from your form?")) {
+		document.delete_field.submit();
+	}
+}
+
+function saveField(link) {
+	form = $(link).parents(".form");
+	form_data = form.serializeArray();
+	form.parent().load(form.attr("action"), form_data, addNameClick);
+}
+</script>
+
+
+{% if field %}
+<form class="form" action="/xforms/{{ xform.pk }}/edit_field/{{ field.pk }}/" method="post">
+{% else %}
+<form class="form" action="/xforms/{{ xform.pk }}/add_field/" method="post">
+{% endif %}
+
+<div style="float:right"><img src="{{ MEDIA_URL }}rapidsms/icons/silk/accept--dull.png"/> <a href="javascript:void(0);" onclick="saveField(this);" class="done">done</a></div>
+
+<div class="form_edit_name">
+	<img id="{{field.id}}" class="form_field_edit" border="0" width="16" height="16" src="{{ MEDIA_URL }}xforms/icons/silk/bullet_arrow_down.png">
+
+ 	{{form.caption}}
+	<div class="name_error">{{form.caption.errors}}</div>
+</div>
+
+<table class="field_table">
+<tr><td>{{form.command.label}}</td><td>{{form.command.errors}}{{form.command}}</td></tr>
+<tr><td>{{form.type.label}}</td><td>{{form.type.errors}}{{form.type}}</td></tr>
+<tr><td>{{form.description.label}}</td><td>{{form.description.errors}}{{form.description}}</td></tr>
+</table>
+
+<div class="constraints_box" id="field_constraints_{{field.pk}}">
+
+{% for constraint in constraints %}
+blah
+	{{constraint.type}}
+{% empty %}
+{% endfor %}
+				
+
+
+</form>
+
+<!-- Not ready for constraints yet
+button onclick="javascript:void(0);"><img src="{{ MEDIA_URL }}rapidsms/icons/silk/add.png"/><div>Add Constraint</div></button-->
+
+
+</div>
+

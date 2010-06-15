@@ -1,0 +1,142 @@
+{% extends "xforms/xforms_base.html" %}
+{% block title %}XForms{% endblock %}
+
+{% block content %}
+
+<script type="text/javascript">
+
+	// send the current field order to the server
+	function updateOrder() {
+		delim = "";
+		sub = "";
+
+		$("#sortable img").each(function() {
+			if (this.id != "") {
+				sub += delim + this.id;
+				delim = ",";
+			}
+		});
+
+		if (sub != "") {
+			$.post("/xforms/{{xform.pk}}/order/",{'order':sub});
+		}
+	}
+
+	// Create our sortable widget and handle any sort events
+	$(function() {
+		$("#sortable").sortable({ update: updateOrder });
+		$("#sortable").disableSelection();
+	});
+	
+	// We need to call this every time a new field box is added/updated 
+	function addNameClick() {
+
+		// Handle field selection
+		$( '.form_field_edit' ).each( function() {
+		
+			// we dont want to re-bind events causing multiple events to trigger
+			if (!this.hasEventHandler) {
+			
+				$(this).click(function() {
+			
+					// hide any open edit boxes
+					// $("div.field_box").load( "/xforms/" +  {{xform.pk}} + "/edit_field/" + this.id + "/");
+		
+					url = "/xforms/" +  {{xform.pk}} + "/edit_field/" + this.id + "/"
+					$(this).parent().load(url);
+					selected = $(("#selection_" + this.id));
+					selected.addClass('form_selected');
+					selected.removeClass('form_unselected');
+					this.hasEventHandler = true;
+				});
+			}
+			
+		});
+		
+		// when we have successful saves, update our sort order too
+		updateOrder();
+	}
+	
+	// Add a new box for entering a new field
+	function addNewFieldBox() {
+		var newBox = $("#new_field_box").clone();
+		newBox.load( "/xforms/" + {{ xform.pk }} + "/add_field/", function() {
+			newBox.show();
+			newBox.id = "field_box_" + Math.floor((new Date()).getTime() / 1000);
+			$("#sortable").append(newBox);
+		});
+		
+	}
+	
+	$( document ).ready( function() {
+
+		// hide our new field template
+		$('#new_field_box').hide();
+		
+		addNameClick();
+		
+		// Handle new field creation button
+		$( '.add_field' ).click( function() {
+			addNewFieldBox();
+		});
+
+		// if no fields, show the add new field form
+		if ({{field_count}} == 0) {
+			addNewFieldBox();
+		}
+	});
+	
+	// Trap our ajax errors and put them where we can see them
+	$.ajaxSetup({
+		error:function(x,e){
+			if(x.status==0){
+				$("#error").html("Oopsie, network not found.");
+			} else if(x.status>=400){
+				$("#error").html(x.responseText);	
+			}
+		}
+	});
+	
+</script>
+
+<div>
+<p><a href="/xforms">&lt; All Forms</a></p>
+</div>
+
+<div class="form_title">{{xform.name}}<span class="form_edit"><a href="">edit</a></span></div>
+<div class="form_body">{{xform.description}}<span class="form_edit"><a href="">edit</a></span></div>
+<div class="form_fields">
+
+	<table>
+		<tr valign="top"><td width="400">
+
+			<ul id="sortable">
+				{% for field in fields %}
+				<li class="field ui-state-default form_unselected" id="{{field.pk}}">
+					<div class="field_box" id="field_box_{{forloop.counter}}">
+						<div class="delete" style="float:right"><img src="{{ MEDIA_URL }}rapidsms/icons/silk/delete.png"></div>
+						<img id="{{field.id}}" class="form_field_edit" border="0" width="16" height="16" src="{{ MEDIA_URL }}xforms/icons/silk/bullet_arrow_right.png"><a id="{{field.id}}" class="form_field_edit" href="javascript:void(0);">{{ field.caption }}</a>
+					</div>
+				</li>
+				{% endfor %}
+
+				<li class="field ui-state-default form_unselected">
+					<div class="field_box" id="new_field_box"></div>
+				</li>
+			</ul>
+
+		</td><td>
+			<div id="edit_box">
+			</div>
+		</td></tr>
+	</table>
+
+</div>
+
+<br/><br/>
+
+<div class="add_field"><a href="javascript:void(0);">Add Field</a></div>
+
+<div id="error"></div>
+
+{% endblock %}
