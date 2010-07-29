@@ -1,4 +1,4 @@
-*Temporary* repository for an app-only quasi-fork of nyaruka'a rapidsms-xforms-builder.
+*Temporary* repository for an app-only quasi-fork of http://github.com/nyaruka/rapidsms-xforms-builder 
 Updated to use current rapidsms core dev repository (http://github.com/rapidsms/rapidsms-core-dev/commit/ddad063e1a14abd969c17e3eaaf05992f87a965a).
 
 Edit settings.py to include:
